@@ -1,0 +1,644 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Hong Kong Age Pyramid</title>
+<style>
+  :root {
+    --bg: #FAFBFC;
+    --panel: #FFFFFF;
+    --ink: #1A212B;
+    --muted: #5A6472;
+    --faint: #8A93A0;
+    --grid: #E4E8ED;
+    --border: #DDE2E8;
+    --male: #1A4E96;
+    --female: #B5862B;
+    --bigyear: rgba(26, 33, 43, 0.13);
+    --hover-band: rgba(26, 33, 43, 0.05);
+    --tooltip-bg: #FFFFFF;
+    --tooltip-shadow: 0 6px 24px rgba(20, 28, 40, 0.18);
+    --btn-bg: #FFFFFF;
+    --btn-active-bg: #1A4E96;
+    --btn-active-ink: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15181D;
+      --panel: #1C2027;
+      --ink: #E8EBF0;
+      --muted: #9AA4B2;
+      --faint: #6E7987;
+      --grid: #2A2F38;
+      --border: #333A45;
+      --male: #3F82DE;
+      --female: #B8872A;
+      --bigyear: rgba(232, 235, 240, 0.12);
+      --hover-band: rgba(232, 235, 240, 0.07);
+      --tooltip-bg: #232830;
+      --tooltip-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+      --btn-bg: #1C2027;
+      --btn-active-bg: #3F82DE;
+      --btn-active-ink: #10131A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15181D;
+    --panel: #1C2027;
+    --ink: #E8EBF0;
+    --muted: #9AA4B2;
+    --faint: #6E7987;
+    --grid: #2A2F38;
+    --border: #333A45;
+    --male: #3F82DE;
+    --female: #B8872A;
+    --bigyear: rgba(232, 235, 240, 0.12);
+    --hover-band: rgba(232, 235, 240, 0.07);
+    --tooltip-bg: #232830;
+    --tooltip-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    --btn-bg: #1C2027;
+    --btn-active-bg: #3F82DE;
+    --btn-active-ink: #10131A;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    padding: 20px 34px 6px;
+  }
+  .titles h1 {
+    margin: 0;
+    font-size: clamp(19px, 2.2vw, 29px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .titles p {
+    margin: 4px 0 0;
+    font-size: clamp(12px, 1.1vw, 15px);
+    color: var(--muted);
+  }
+  .controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .chip-btn {
+    appearance: none;
+    font: inherit;
+    font-size: 13.5px;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--btn-bg);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .chip-btn[aria-pressed="true"] {
+    background: var(--btn-active-bg);
+    color: var(--btn-active-ink);
+    border-color: var(--btn-active-bg);
+    font-weight: 600;
+  }
+  .chip-btn:focus-visible, input[type=range]:focus-visible {
+    outline: 2px solid var(--male);
+    outline-offset: 2px;
+  }
+
+  .statrow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 30px;
+    padding: 8px 34px 2px;
+    align-items: baseline;
+  }
+  .tile { display: flex; align-items: baseline; gap: 8px; }
+  .tile .lab {
+    font-size: 11.5px;
+    color: var(--faint);
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+  }
+  .tile .val {
+    font-size: clamp(16px, 1.6vw, 21px);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .tile .val.m { color: var(--male); }
+  .tile .val.f { color: var(--female); }
+  .legend {
+    margin-left: auto;
+    display: flex;
+    gap: 18px;
+    font-size: clamp(12px, 1.05vw, 14.5px);
+    color: var(--muted);
+    align-items: center;
+  }
+  .legend .item { display: inline-flex; align-items: center; gap: 7px; }
+  .legend .sw { width: 13px; height: 13px; border-radius: 3.5px; }
+  .legend .hint { color: var(--faint); font-size: 0.85em; }
+
+  #chartwrap { flex: 1; min-height: 0; padding: 0 18px; position: relative; }
+  #chart { width: 100%; height: 100%; display: block; }
+  svg text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .gridline { stroke: var(--grid); stroke-width: 1; }
+  .centerline { stroke: var(--grid); stroke-width: 1; }
+  .xtick { fill: var(--muted); font-size: 12.5px; }
+  .agelab { fill: var(--muted); font-size: 12px; }
+  .axlab { fill: var(--faint); font-size: 11.5px; letter-spacing: 0.05em; }
+  .bigyear {
+    fill: var(--bigyear);
+    font-size: 88px;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+  }
+  .bar { cursor: pointer; }
+  .bar.m { fill: var(--male); }
+  .bar.f { fill: var(--female); }
+  .bar.cohort { stroke: var(--ink); stroke-width: 2; }
+  @media (prefers-reduced-motion: no-preference) {
+    .bar { transition: x 0.28s ease, width 0.28s ease; }
+    .pinpath { transition: d 0.28s ease; }
+  }
+  .pinpath {
+    fill: none;
+    stroke: var(--ink);
+    stroke-width: 1.7;
+    stroke-dasharray: 4 4;
+    opacity: 0.75;
+  }
+  .pinlab, .cohortlab { fill: var(--ink); font-size: 12.5px; font-weight: 700; }
+  .cohortlab { }
+
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--tooltip-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--tooltip-shadow);
+    padding: 10px 13px;
+    font-size: 13.5px;
+    line-height: 1.55;
+    z-index: 30;
+    display: none;
+    min-width: 170px;
+  }
+  #tooltip b { font-size: 14.5px; }
+  #tooltip .num { font-variant-numeric: tabular-nums; font-weight: 600; float: right; margin-left: 16px; }
+  #tooltip .sub { color: var(--faint); font-size: 11.5px; }
+
+  .sliderrow {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 2px 34px 4px;
+  }
+  #play {
+    width: 42px; height: 42px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--btn-active-bg);
+    color: var(--btn-active-ink);
+    font-size: 16px;
+    cursor: pointer;
+    flex: none;
+  }
+  .sliderbox { flex: 1; position: relative; padding-bottom: 18px; }
+  input[type=range] {
+    width: 100%;
+    margin: 0;
+    accent-color: var(--male);
+    height: 26px;
+  }
+  .tickrow { position: absolute; left: 0; right: 0; bottom: 0; height: 16px; }
+  .tickrow span {
+    position: absolute;
+    transform: translateX(-50%);
+    font-size: 11.5px;
+    color: var(--faint);
+    font-variant-numeric: tabular-nums;
+  }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 4px 34px 12px;
+    font-size: 11.5px;
+    color: var(--faint);
+  }
+
+  #tablepanel {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    padding: 22px 34px;
+  }
+  #tablepanel.open { display: flex; }
+  #tablepanel .tp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  #tablepanel h2 { margin: 0; font-size: 20px; }
+  #tablepanel .tp-scroll {
+    flex: 1;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+  }
+  #tablepanel table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  #tablepanel th, #tablepanel td {
+    padding: 6px 18px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  #tablepanel th:first-child, #tablepanel td:first-child { text-align: left; }
+  #tablepanel thead th {
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+    color: var(--muted);
+  }
+  #tablepanel tbody tr:nth-child(even) { background: var(--hover-band); }
+</style>
+
+<header>
+  <div class="titles">
+    <h1>Hong Kong&rsquo;s Age Pyramid, 1961&ndash;2025</h1>
+    <p>Mid-year population by sex and age group, thousands &middot; press play and watch the 1960s baby boom climb the pyramid</p>
+  </div>
+  <div class="controls">
+    <button class="chip-btn" id="pinBtn" aria-pressed="false">Pin this year as outline</button>
+    <button class="chip-btn" id="tableToggle" aria-pressed="false">Data table</button>
+  </div>
+</header>
+
+<div class="statrow">
+  <span class="tile"><span class="lab">Total</span><span class="val" id="stTotal">&ndash;</span></span>
+  <span class="tile"><span class="lab">Aged 0&ndash;14</span><span class="val" id="stYoung">&ndash;</span></span>
+  <span class="tile"><span class="lab">Aged 65+</span><span class="val" id="stOld">&ndash;</span></span>
+  <span class="tile"><span class="lab">Median age</span><span class="val" id="stMed">&ndash;</span></span>
+  <span class="legend">
+    <span class="item"><span class="sw" style="background:var(--male)"></span>Male</span>
+    <span class="item"><span class="sw" style="background:var(--female)"></span>Female</span>
+    <span class="item hint">Click a bar to track its birth cohort &middot; &larr; &rarr; step years &middot; space = play</span>
+  </span>
+</div>
+
+<div id="chartwrap">
+  <svg id="chart" role="img"
+       aria-label="Animated age pyramid of Hong Kong, 1961 to 2025. Open the data table for exact figures."></svg>
+  <div id="tooltip"></div>
+</div>
+
+<div class="sliderrow">
+  <button id="play" aria-label="Play animation">&#9654;</button>
+  <div class="sliderbox">
+    <input type="range" id="yearSlider" min="1961" max="2025" step="1" value="1961" aria-label="Year">
+    <div class="tickrow" id="tickrow"></div>
+  </div>
+</div>
+
+<footer>
+  <span>Source: Census and Statistics Department, HKSAR, Table 110-01001 (population by sex and age group, mid-year estimates, current revised series).</span>
+  <span>Axis fixed at 400,000 per sex across all years for comparability.</span>
+</footer>
+
+<div id="tablepanel" role="dialog" aria-label="Data table">
+  <div class="tp-head">
+    <h2 id="tabletitle">Population by age group</h2>
+    <button class="chip-btn" id="tableClose">Close &times;</button>
+  </div>
+  <div class="tp-scroll"><table id="datatable"></table></div>
+</div>
+
+<script>
+const AGE = ['0 - 4','5 - 9','10 - 14','15 - 19','20 - 24','25 - 29','30 - 34','35 - 39','40 - 44','45 - 49','50 - 54','55 - 59','60 - 64','65 - 69','70 - 74','75 - 79','80 - 84','≥85'];
+const AGE_LO = [0,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85];
+const AGE_HI = [4,9,14,19,24,29,34,39,44,49,54,59,64,69,74,79,84,110];
+// {year: [male x18, female x18]} in thousands, C&SD Table 110-01001 mid-year
+const DATA = {"1961":[268.4,221.6,161.1,96.0,102.1,129.8,135.4,119.1,106.9,85.1,64.6,38.0,26.8,15.3,9.6,4.1,2.2,0.8,260.5,212.1,160.2,91.0,91.6,118.0,124.8,110.1,96.8,82.6,69.3,53.1,43.0,30.3,20.1,10.2,5.5,2.0],"1962":[271.9,243.9,178.0,110.8,107.6,129.4,138.1,122.8,110.6,79.2,69.4,41.5,29.1,16.4,10.1,4.6,2.1,1.1,263.0,222.8,175.5,101.7,90.1,114.4,126.0,113.3,99.9,85.5,72.6,55.5,45.5,32.2,21.3,11.2,5.5,2.6],"1963":[275.6,245.1,191.6,124.3,109.4,126.8,138.7,126.4,113.2,93.2,73.1,45.6,30.5,17.9,10.4,5.0,2.1,1.2,265.6,233.1,187.6,114.8,88.7,109.8,125.9,116.5,102.6,88.1,75.2,58.1,47.1,34.2,22.5,12.3,5.6,3.1],"1964":[275.3,255.4,202.8,137.4,106.1,120.7,136.4,128.8,113.8,96.5,75.6,50.1,31.0,19.7,10.5,5.6,2.1,1.4,265.0,243.0,197.0,130.2,87.5,104.0,124.3,119.5,104.7,90.6,77.3,61.1,48.2,36.5,23.6,13.6,5.8,3.5],"1965":[272.0,264.3,213.2,152.4,107.6,116.9,134.8,132.4,115.7,100.6,78.5,55.4,32.0,21.6,10.9,6.1,2.1,1.5,261.3,251.9,205.4,147.0,89.3,98.7,122.0,122.4,106.9,93.4,79.3,64.3,49.3,38.7,24.9,14.9,6.3,3.9],"1966":[263.9,271.2,223.7,165.0,101.0,106.7,126.9,130.4,113.5,101.2,79.2,58.9,32.7,22.9,11.3,6.5,2.3,1.5,252.8,259.0,214.1,162.1,92.2,92.8,117.8,123.6,108.7,95.6,80.9,67.2,50.5,40.5,26.2,16.0,6.9,4.2],"1967":[251.7,275.6,234.6,179.9,112.4,106.6,125.7,133.5,117.7,105.4,83.5,63.5,35.8,24.4,12.2,6.8,2.6,1.5,240.1,263.9,223.5,176.1,101.7,90.0,113.8,124.8,111.8,98.4,83.4,70.1,52.6,42.2,27.9,17.0,7.7,4.4],"1968":[239.2,277.4,245.4,193.1,124.9,106.0,122.7,134.4,121.6,108.3,87.7,67.1,39.8,25.3,13.5,6.9,2.9,1.6,227.1,266.1,233.4,187.8,114.5,88.2,109.0,124.7,115.0,101.0,85.9,72.6,55.1,43.5,29.9,18.0,8.5,4.6],"1969":[227.7,275.9,255.6,203.7,136.8,104.5,117.7,132.9,124.7,109.6,91.4,69.8,44.3,25.8,15.1,6.9,3.3,1.6,215.3,265.1,243.3,197.0,129.7,87.3,103.5,123.2,118.2,103.1,88.5,74.6,57.9,44.5,32.0,19.0,9.5,4.9],"1970":[217.0,271.0,264.5,215.5,158.1,109.9,116.8,133.9,130.7,113.1,96.8,73.3,49.7,26.7,16.9,7.1,3.6,1.7,204.4,260.4,252.1,205.9,147.7,89.9,98.6,121.4,121.4,105.7,91.6,76.7,61.2,45.7,34.1,20.1,10.5,5.3],"1971":[209.3,262.7,271.8,227.3,177.4,116.5,115.2,133.1,134.9,116.2,101.3,76.7,54.7,28.4,18.4,7.6,3.9,1.8,196.7,252.0,259.6,215.1,164.4,95.4,94.4,118.3,123.8,108.4,94.6,78.9,64.3,47.2,36.1,21.5,11.4,6.0],"1972":[205.1,254.2,277.2,237.9,190.4,125.5,114.2,131.0,136.5,119.8,104.4,80.9,58.2,31.1,19.4,8.5,4.0,2.0,192.6,241.8,265.3,224.7,178.0,104.4,91.6,114.3,124.6,111.7,97.3,81.5,66.9,49.3,37.6,23.0,12.1,6.6],"1973":[204.4,246.3,282.4,249.4,204.3,142.5,113.7,130.9,137.0,124.9,107.9,85.7,62.4,34.7,20.6,9.9,4.2,2.2,192.4,233.1,270.1,235.9,189.9,119.6,90.3,112.0,124.5,116.5,101.2,85.0,70.0,52.3,39.8,25.0,13.2,7.4],"1974":[205.5,237.3,286.8,260.5,215.0,164.5,113.5,132.1,137.3,129.4,112.1,89.9,67.7,38.3,22.3,11.4,4.7,2.4,194.7,225.1,275.8,247.8,199.8,140.7,89.3,112.0,123.5,121.5,106.5,88.9,73.9,55.1,43.0,27.0,14.4,8.1],"1975":[207.3,226.5,285.9,270.0,224.5,183.9,117.3,132.2,137.7,132.2,116.4,92.9,72.8,40.9,23.8,12.3,4.9,2.7,195.9,213.2,273.6,256.1,209.2,156.8,89.7,108.3,121.6,122.9,109.8,91.3,76.7,56.2,44.7,27.9,14.5,9.0],"1976":[205.1,216.5,279.2,277.8,233.1,197.2,126.1,129.3,137.9,134.0,119.7,95.8,76.4,43.4,24.6,12.5,5.0,2.4,193.4,205.0,267.0,263.4,218.7,170.5,95.5,103.6,119.4,123.3,112.8,93.8,79.0,57.5,45.9,28.9,15.2,9.1],"1977":[205.6,209.9,267.4,284.8,243.9,206.1,139.1,123.6,137.5,134.7,122.0,99.8,78.5,48.7,26.6,13.6,5.2,2.6,192.7,198.6,255.3,270.3,229.0,181.3,109.6,97.3,118.2,123.6,115.4,97.1,81.3,60.9,46.4,31.2,16.1,9.8],"1978":[205.2,208.2,254.7,289.6,255.0,213.6,156.7,118.9,137.6,136.3,124.4,104.0,81.7,53.7,29.1,15.1,5.8,2.7,192.3,197.2,242.0,275.3,239.4,191.8,127.4,92.3,116.9,123.3,117.6,100.6,83.9,65.9,47.7,33.6,17.3,10.7],"1979":[211.2,217.2,248.7,302.3,285.2,238.1,186.1,125.6,144.1,143.2,131.2,108.8,85.6,59.6,33.2,16.4,6.6,2.9,197.1,204.4,235.5,285.3,261.4,210.7,151.5,95.5,117.4,125.0,120.7,103.9,87.9,70.8,51.0,35.2,18.8,11.6],"1980":[211.2,218.0,238.1,301.5,305.0,255.2,210.3,132.0,145.4,145.3,137.2,111.0,90.3,64.1,36.2,17.7,7.4,3.1,197.0,204.2,224.6,283.3,276.0,222.4,171.2,99.2,115.5,124.6,123.0,105.8,90.7,73.4,53.9,36.9,19.9,12.5],"1981":[214.5,215.3,229.7,295.7,318.1,270.5,231.4,142.8,146.1,147.1,141.3,114.1,94.0,68.2,39.9,19.3,8.2,3.5,200.2,200.9,216.7,276.2,287.5,235.6,190.6,108.6,113.3,123.6,124.6,107.4,93.3,76.3,57.0,37.3,21.7,12.9],"1982":[218.2,218.2,227.3,280.4,317.1,281.0,241.5,157.2,141.8,148.5,142.6,118.6,95.5,71.3,42.7,20.8,8.4,3.7,204.0,201.4,212.3,264.1,292.1,249.3,203.8,123.3,110.7,123.8,125.6,111.5,95.4,78.7,58.7,39.0,22.3,13.7],"1983":[220.9,218.5,227.6,267.2,313.0,293.2,249.1,175.8,136.8,149.3,144.2,123.3,97.7,73.8,45.7,22.2,8.9,4.0,206.5,201.9,210.3,250.6,293.4,264.4,214.0,142.2,107.7,123.8,126.4,115.1,97.6,80.9,60.7,40.5,23.2,14.7],"1984":[220.5,217.9,228.0,254.5,304.9,303.3,253.4,193.8,133.2,147.6,145.2,127.1,100.2,75.8,48.9,23.5,9.6,4.3,205.7,201.3,209.5,237.6,290.1,277.9,222.4,161.8,105.5,122.3,126.5,118.0,100.1,82.4,63.2,41.3,24.7,15.9],"1985":[218.6,217.0,228.8,244.6,296.7,310.4,258.3,210.6,134.2,145.4,146.6,129.8,104.1,77.7,52.5,25.0,10.7,4.6,203.5,201.1,209.3,226.4,284.3,289.5,232.4,180.5,107.0,120.5,126.4,120.1,103.7,83.8,66.2,42.2,26.4,17.3],"1986":[215.9,217.4,229.2,237.2,290.0,315.4,267.0,224.2,140.6,141.3,147.6,132.3,108.1,79.7,55.6,26.8,11.7,4.9,200.6,201.6,209.0,217.5,278.5,298.0,245.0,196.5,114.1,117.5,126.9,121.6,107.6,85.9,68.8,43.6,28.4,18.6],"1987":[208.3,220.7,226.2,229.7,278.3,317.8,279.7,236.1,154.1,137.5,147.2,136.2,111.5,82.4,57.6,29.7,12.3,5.6,193.4,204.6,207.4,210.1,268.3,303.5,259.4,210.1,127.4,113.0,125.8,123.2,110.3,88.7,70.3,45.7,27.9,20.5],"1988":[201.3,223.7,222.4,225.9,262.9,316.0,291.2,244.7,172.7,134.1,146.3,138.9,115.3,85.6,59.2,32.7,12.8,6.3,186.2,208.0,204.2,207.2,254.7,307.6,273.7,220.2,145.0,108.6,124.0,124.6,112.4,91.5,70.8,48.1,26.9,21.9],"1989":[199.4,225.4,219.5,226.6,248.3,312.1,303.1,251.0,191.9,131.9,144.3,140.1,118.2,88.0,60.5,35.4,13.5,6.9,184.6,209.4,202.2,209.2,241.1,308.9,288.2,229.7,164.5,106.2,121.5,124.8,114.1,93.9,71.9,50.2,26.7,23.0],"1990":[194.9,221.3,221.1,226.2,235.0,302.2,310.2,256.0,208.5,132.6,141.5,139.7,121.2,90.0,62.2,37.6,14.6,7.3,180.8,204.9,203.3,208.0,226.9,305.1,298.0,238.7,181.9,107.1,117.9,123.5,115.2,95.5,73.3,52.0,27.2,23.1],"1991":[191.7,213.0,218.4,217.6,227.6,294.1,317.6,265.9,224.1,140.7,140.2,140.4,125.1,93.6,64.5,39.7,16.5,7.5,177.5,196.9,201.2,200.0,227.4,303.6,308.8,250.2,197.0,114.3,115.0,123.3,118.0,98.9,75.5,53.7,30.3,22.2],"1992":[191.5,206.2,217.9,212.7,220.5,282.0,318.9,276.8,234.1,153.6,135.4,140.1,126.6,97.1,66.7,41.2,17.4,8.3,178.6,193.4,204.1,195.8,220.5,296.1,317.5,265.5,209.8,127.0,110.9,122.6,120.1,102.5,78.3,56.0,31.0,23.8],"1993":[192.7,200.6,218.4,209.7,219.9,270.6,319.9,291.7,243.5,172.7,132.2,140.6,128.0,101.2,68.8,43.2,19.2,9.4,179.6,190.1,207.2,196.3,220.7,292.2,327.2,284.4,222.2,144.6,107.3,121.5,121.2,106.1,81.6,58.4,32.8,25.3],"1994":[193.8,199.4,221.1,215.4,222.8,260.7,318.1,306.7,251.1,193.8,131.0,139.7,130.5,105.6,72.1,45.5,21.9,10.3,178.4,188.3,209.0,199.3,223.3,289.9,336.6,303.0,236.0,165.7,105.4,120.2,122.2,109.5,85.4,60.7,36.1,26.9],"1995":[196.5,198.1,222.5,218.5,224.5,251.3,312.2,317.4,258.3,212.5,133.3,137.7,132.2,109.2,76.2,48.2,24.3,11.4,181.1,186.9,210.0,202.7,226.1,287.5,342.4,319.4,248.2,186.4,107.5,118.5,122.6,112.5,88.9,63.1,39.1,28.9],"1996":[197.2,200.4,226.0,229.3,236.7,249.4,315.1,333.6,275.6,236.0,144.6,140.3,140.6,118.6,84.4,52.4,27.1,12.7,181.3,187.2,212.0,216.4,239.0,289.3,347.8,336.5,268.8,212.4,119.7,118.5,128.1,119.6,96.2,68.2,43.4,31.1],"1997":[189.3,202.7,218.4,233.3,235.6,246.0,300.0,336.3,288.1,243.9,158.7,137.0,141.1,122.2,86.8,55.1,27.0,13.9,173.9,187.9,205.8,224.3,240.2,288.9,339.4,342.0,284.0,224.7,134.6,113.5,128.1,121.2,97.7,70.8,43.8,33.1],"1998":[177.2,207.0,217.0,237.3,230.8,245.2,284.8,334.8,303.9,249.9,174.7,132.6,138.8,126.9,89.9,57.0,28.3,13.8,162.5,192.1,203.6,227.9,240.5,289.8,329.0,352.7,300.5,235.8,151.6,107.8,125.3,122.0,100.7,73.2,44.4,34.4],"1999":[168.2,209.0,220.9,237.0,227.4,243.5,271.1,331.0,316.4,256.0,188.2,133.2,136.5,129.6,93.1,59.7,29.3,14.6,154.1,193.2,208.9,225.8,242.2,287.0,324.0,361.4,315.3,245.6,169.8,107.9,122.9,122.8,102.0,76.8,46.2,35.9],"2000":[153.4,208.8,221.9,236.4,224.7,242.6,263.2,323.1,326.9,260.7,210.4,132.4,135.8,129.0,97.8,61.1,32.0,16.3,141.3,192.7,210.0,222.6,242.1,290.6,322.1,366.5,331.9,253.9,190.8,109.4,121.6,122.6,104.6,78.2,48.9,38.7],"2001":[142.0,205.2,220.9,229.3,225.1,240.5,255.9,312.7,335.4,270.5,226.7,136.0,133.9,128.2,102.3,63.6,34.2,19.6,130.8,191.2,208.4,216.7,242.8,283.6,326.4,370.5,343.3,269.2,210.3,116.6,117.1,121.9,107.9,80.5,52.1,43.0],"2002":[130.3,200.8,222.6,224.8,222.7,236.2,251.6,301.1,335.2,283.6,233.9,149.3,128.9,128.6,105.1,67.2,36.5,21.2,121.4,188.8,210.1,213.3,232.3,274.4,329.1,368.3,352.4,286.7,223.4,133.3,112.5,123.0,109.6,84.3,55.1,46.5],"2003":[122.8,191.6,221.1,219.7,221.8,228.0,247.0,283.3,332.9,297.4,239.1,163.0,124.5,127.2,108.7,70.2,38.7,22.1,114.5,180.8,208.8,210.5,230.1,263.3,326.3,354.3,361.9,302.3,233.0,150.1,107.3,122.2,111.2,86.9,58.4,49.8],"2004":[118.3,182.8,217.0,221.4,226.0,223.3,243.9,270.5,328.9,309.4,246.0,177.7,124.0,126.5,113.2,73.2,40.9,23.8,109.4,172.8,204.9,214.4,239.7,262.2,320.2,344.4,370.3,317.0,245.0,168.2,106.8,121.7,114.7,89.9,62.1,53.0],"2005":[114.4,171.3,213.1,220.2,226.4,220.5,241.8,256.6,318.4,319.5,253.9,198.0,125.2,126.3,112.7,77.4,42.6,25.7,106.7,161.5,201.9,214.0,244.5,266.2,314.6,334.3,370.8,328.7,256.0,190.1,109.9,119.9,115.6,92.4,65.1,57.0],"2006":[110.4,162.3,211.3,222.3,225.6,223.8,238.8,248.0,304.4,323.7,264.0,214.7,127.6,125.2,112.4,82.3,44.8,28.5,102.6,151.8,200.8,213.9,246.8,278.5,309.6,331.4,365.3,335.7,267.6,207.8,116.3,116.6,115.9,96.3,67.9,62.2],"2007":[111.3,152.6,209.9,226.1,221.3,226.7,236.7,243.4,293.1,320.1,276.4,222.2,140.8,122.5,115.4,86.9,47.8,30.7,103.2,141.7,199.8,214.8,244.0,287.0,313.1,331.7,358.6,337.7,280.8,219.4,131.7,112.3,119.7,98.6,71.7,66.6],"2008":[114.0,146.0,203.4,226.8,217.9,230.5,230.2,241.3,277.1,320.1,289.6,228.9,155.1,118.7,116.1,91.3,50.4,32.8,105.2,134.4,193.2,214.3,238.9,297.3,311.0,334.1,344.4,348.2,295.7,229.0,148.5,107.1,119.6,101.8,74.2,70.7],"2009":[117.7,136.3,192.3,221.8,218.9,230.6,225.0,240.0,262.7,315.9,299.3,236.9,169.6,118.3,115.3,95.8,53.2,35.2,108.3,126.6,182.6,209.3,235.4,301.7,310.8,331.7,334.4,354.7,306.9,239.0,165.8,105.3,118.4,105.5,76.6,75.0],"2010":[124.2,131.1,181.5,220.3,219.9,230.3,223.3,238.7,250.0,307.7,307.7,243.7,188.2,119.3,116.7,96.3,57.6,37.8,113.8,122.1,171.5,207.7,231.8,304.6,315.9,332.0,329.9,357.9,317.7,247.4,186.8,107.4,116.9,107.2,79.6,79.7],"2011":[129.5,125.8,170.9,217.3,221.7,229.5,225.8,234.5,242.7,295.3,312.8,253.9,205.1,121.5,116.7,97.0,62.3,40.7,119.7,117.4,160.2,206.4,229.8,304.6,324.2,328.1,330.0,356.4,324.9,259.2,204.5,112.8,113.7,108.2,83.8,84.7],"2012":[136.3,125.8,158.3,215.3,226.3,226.0,228.4,234.5,241.2,286.1,311.8,267.5,213.7,134.8,112.8,99.1,65.4,44.0,126.0,118.4,148.1,204.4,231.5,302.8,332.8,331.5,334.7,351.3,329.6,273.1,214.8,129.6,108.3,109.8,85.6,90.5],"2013":[134.2,127.9,149.2,208.7,226.3,221.8,231.9,229.5,239.8,270.8,313.8,281.1,219.9,148.7,109.5,100.4,69.3,47.1,125.5,120.2,139.5,197.0,231.2,294.7,341.4,328.8,337.7,337.0,340.4,288.0,222.7,146.4,103.6,109.8,88.3,96.8],"2014":[137.4,136.0,141.5,198.5,223.8,224.2,233.0,226.8,239.7,258.0,310.6,291.6,227.5,163.0,109.6,99.9,73.3,50.1,128.1,126.7,133.8,188.0,227.0,290.8,346.0,329.5,338.4,329.1,347.9,299.2,232.6,163.3,101.9,109.4,91.4,101.9],"2015":[146.2,145.0,136.0,186.6,222.6,226.0,233.8,225.3,239.2,246.1,303.8,300.9,234.1,180.3,110.3,101.2,73.8,54.4,135.6,134.2,129.4,175.8,226.1,287.6,345.0,334.0,339.1,323.8,351.3,309.4,239.8,182.8,103.4,108.3,92.4,107.7],"2016":[144.8,151.2,132.3,176.5,220.3,227.7,233.0,228.0,234.6,240.2,292.9,306.8,244.1,196.5,112.2,101.2,74.1,59.0,134.7,140.6,126.9,164.4,224.8,282.5,344.2,343.3,335.2,326.8,350.2,316.2,251.2,199.2,108.6,105.2,92.9,114.3],"2017":[141.2,157.1,134.9,161.4,216.5,229.7,229.3,232.2,234.7,241.1,280.9,307.7,258.9,205.0,124.6,97.9,76.7,63.8,132.1,144.2,128.8,150.9,222.0,275.3,338.7,352.5,338.5,334.1,344.6,323.6,267.2,209.3,124.7,99.1,94.1,119.9],"2018":[138.2,158.7,141.3,151.8,208.7,227.7,227.9,237.7,232.0,243.1,266.9,308.8,275.3,212.3,137.8,95.6,78.7,68.9,129.6,147.2,132.7,143.6,213.9,270.2,329.5,363.5,338.2,341.0,333.8,337.7,285.3,219.5,140.6,94.9,93.7,126.3],"2019":[134.9,160.0,145.6,143.6,195.6,224.6,230.1,240.3,231.9,246.1,258.1,305.3,287.0,220.2,152.7,94.9,79.3,73.8,126.6,149.7,135.7,138.0,202.2,265.5,325.6,369.2,340.8,346.8,331.7,347.0,298.5,230.7,157.7,93.4,92.6,132.2],"2020":[127.0,156.4,147.2,137.5,182.6,221.9,231.2,240.1,233.6,246.0,248.8,297.0,297.9,227.7,168.8,92.2,80.5,80.1,119.7,146.7,138.9,133.0,183.2,258.1,315.0,364.3,346.1,345.1,327.1,348.0,307.2,238.2,173.7,92.6,89.6,138.0],"2021":[117.5,148.8,149.7,134.9,164.7,214.5,228.0,234.5,235.0,242.2,245.0,284.9,300.3,239.5,182.0,96.6,79.7,84.5,111.5,140.6,139.7,130.0,161.5,243.9,299.0,353.2,351.6,340.8,330.2,346.0,313.6,252.7,188.8,100.5,85.5,141.7],"2022":[109.4,139.1,150.5,137.3,153.0,207.3,225.6,227.3,234.6,234.8,243.7,270.7,303.6,254.1,192.9,107.0,77.1,86.5,103.7,131.8,139.6,131.5,149.9,228.8,286.6,333.7,350.1,331.8,333.1,335.2,324.5,269.4,202.1,114.1,82.2,143.5],"2023":[104.1,138.2,161.7,150.0,159.1,205.4,226.7,231.8,238.8,234.4,246.4,262.3,305.9,276.0,205.5,122.0,77.3,89.6,97.7,131.1,148.9,141.4,159.3,226.8,285.8,333.0,361.4,332.5,341.3,329.5,340.7,292.5,219.3,132.1,81.3,146.3],"2024":[97.7,134.9,155.5,149.3,154.1,194.9,226.7,232.8,238.9,230.4,246.0,251.7,299.8,283.8,212.1,139.3,76.0,94.0,90.9,127.2,144.6,139.1,154.3,215.6,282.3,331.1,363.1,330.9,344.0,323.0,346.4,300.9,230.3,151.6,81.7,149.2],"2025":[90.3,129.2,149.6,144.3,150.7,188.6,226.8,237.0,241.8,231.6,244.2,244.6,288.1,290.1,219.0,154.7,74.0,95.5,83.8,121.7,140.2,134.2,149.6,204.3,276.4,326.6,364.9,339.5,341.7,322.7,344.9,308.1,239.3,168.6,82.6,149.7]};
+
+const YEARS = Object.keys(DATA).map(Number).sort((a, b) => a - b);
+const YMIN = YEARS[0], YMAX = YEARS[YEARS.length - 1];
+const XMAX = 400; // '000 per sex, fixed for all years
+
+const svg = document.getElementById('chart');
+const wrap = document.getElementById('chartwrap');
+const tooltip = document.getElementById('tooltip');
+const slider = document.getElementById('yearSlider');
+const NS = 'http://www.w3.org/2000/svg';
+
+let year = YMIN;
+let pinned = null;     // pinned year for ghost outline
+let cohort = null;     // {bLo, bHi} birth-year range being tracked
+let playing = false, playTimer = null;
+let G = null;          // geometry
+
+function el(name, attrs, parent) {
+  const n = document.createElementNS(NS, name);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(n);
+  return n;
+}
+const fmtK = v => (v * 1000).toLocaleString('en');
+const fmtM = v => (v / 1000).toFixed(2) + 'M';
+
+function build() {
+  svg.innerHTML = '';
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  if (W < 60 || H < 60) return;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  const M = { top: 8, bottom: 30, side: 30 };
+  const GUT = 56;
+  const halfW = (W - 2 * M.side - GUT) / 2;
+  const cL = M.side + halfW;            // right edge of male half
+  const cR = cL + GUT;                  // left edge of female half
+  const plotH = H - M.top - M.bottom;
+  const rowH = plotH / 18;
+  const barH = Math.max(4, rowH - 3);
+  const rowY = i => M.top + (17 - i) * rowH + (rowH - barH) / 2;  // 0-4 at bottom
+  const sx = v => v / XMAX * halfW;
+  G = { W, H, M, GUT, halfW, cL, cR, rowY, barH, sx, rowH };
+
+  // gridlines + x labels, both halves
+  for (let v = 0; v <= XMAX; v += 100) {
+    const xm = cL - sx(v), xf = cR + sx(v);
+    el('line', { x1: xm, x2: xm, y1: M.top, y2: H - M.bottom, class: 'gridline' });
+    el('text', { x: xm, y: H - M.bottom + 18, 'text-anchor': 'middle', class: 'xtick' }).textContent = v;
+    if (v > 0) {
+      el('line', { x1: xf, x2: xf, y1: M.top, y2: H - M.bottom, class: 'gridline' });
+      el('text', { x: xf, y: H - M.bottom + 18, 'text-anchor': 'middle', class: 'xtick' }).textContent = v;
+    }
+  }
+  // age labels in the gutter
+  for (let i = 0; i < 18; i++) {
+    el('text', { x: cL + GUT / 2, y: rowY(i) + barH / 2 + 4, 'text-anchor': 'middle', class: 'agelab' })
+      .textContent = AGE[i].replace(/ /g, '');
+  }
+
+  // big year readout
+  el('text', { x: M.side + 10, y: M.top + 78, class: 'bigyear', id: 'bigyear' }).textContent = year;
+
+  // bars (built once, widths updated per year)
+  for (let i = 0; i < 18; i++) {
+    el('rect', { class: 'bar m', y: rowY(i), height: barH, x: cL, width: 0, 'data-i': i, 'data-s': 'm' });
+    el('rect', { class: 'bar f', y: rowY(i), height: barH, x: cR, width: 0, 'data-i': i, 'data-s': 'f' });
+  }
+
+  // pinned-year ghost outline + label
+  el('path', { class: 'pinpath', id: 'pinpath', d: '' });
+  el('text', { class: 'pinlab', id: 'pinlab', x: 0, y: 0 }).textContent = '';
+  el('text', { class: 'cohortlab', id: 'cohortlab', x: 0, y: 0 }).textContent = '';
+
+  update(false);
+}
+
+function pyramidPath(yr) {
+  // staircase outline for both halves for year yr
+  const d = DATA[yr];
+  let pm = '', pf = '';
+  for (let i = 17; i >= 0; i--) {
+    const yT = G.rowY(i) - 1.5, yB = G.rowY(i) + G.barH + 1.5;
+    const xm = G.cL - G.sx(d[i]), xf = G.cR + G.sx(d[18 + i]);
+    pm += (i === 17 ? `M${G.cL} ${yT}` : '') + `L${xm} ${yT}L${xm} ${yB}` + (i ? '' : `L${G.cL} ${yB}`);
+    pf += (i === 17 ? `M${G.cR} ${yT}` : '') + `L${xf} ${yT}L${xf} ${yB}` + (i ? '' : `L${G.cR} ${yB}`);
+  }
+  return pm + pf;
+}
+
+function cohortRows() {
+  if (!cohort) return [];
+  const lo = year - cohort.bHi, hi = year - cohort.bLo;  // age range now
+  const out = [];
+  for (let i = 0; i < 18; i++) {
+    if (AGE_HI[i] >= lo && AGE_LO[i] <= hi && hi >= 0) out.push(i);
+  }
+  return out;
+}
+
+function update(animate) {
+  const d = DATA[year];
+  document.getElementById('bigyear').textContent = year;
+
+  const rows = new Set(cohortRows());
+  svg.querySelectorAll('.bar').forEach(r => {
+    const i = +r.dataset.i, male = r.dataset.s === 'm';
+    const v = d[male ? i : 18 + i];
+    const w = G.sx(v);
+    r.setAttribute('width', Math.max(0, w));
+    r.setAttribute('x', male ? G.cL - w : G.cR);
+    r.classList.toggle('cohort', rows.has(i));
+  });
+
+  // cohort label
+  const cl = document.getElementById('cohortlab');
+  if (cohort && rows.size) {
+    const top = Math.min(...rows), i = Math.max(...rows);
+    const v = Math.max(d[i], d[18 + i]);
+    cl.textContent = `Born ${cohort.bLo}–${String(cohort.bHi).slice(2)}`;
+    cl.setAttribute('x', G.cR + G.sx(d[18 + top]) + 10);
+    cl.setAttribute('y', G.rowY(top) + G.barH / 2 + 4);
+  } else cl.textContent = '';
+
+  // pinned outline
+  const pp = document.getElementById('pinpath');
+  const pl = document.getElementById('pinlab');
+  if (pinned !== null && pinned !== year) {
+    pp.setAttribute('d', pyramidPath(pinned));
+    pl.textContent = `◌ ${pinned} outline`;
+    pl.setAttribute('x', G.W - G.M.side);
+    pl.setAttribute('y', G.M.top + 20);
+    pl.setAttribute('text-anchor', 'end');
+  } else { pp.setAttribute('d', ''); pl.textContent = ''; }
+
+  // stats
+  let tot = 0, young = 0, old = 0;
+  const both = [];
+  for (let i = 0; i < 18; i++) {
+    const b = d[i] + d[18 + i];
+    both.push(b); tot += b;
+    if (i <= 2) young += b;
+    if (i >= 13) old += b;
+  }
+  let cum = 0, med = 0;
+  for (let i = 0; i < 18; i++) {
+    if (cum + both[i] >= tot / 2) {
+      const width = (i === 17 ? 15 : 5);
+      med = AGE_LO[i] + (tot / 2 - cum) / both[i] * width;
+      break;
+    }
+    cum += both[i];
+  }
+  document.getElementById('stTotal').textContent = fmtM(tot);
+  document.getElementById('stYoung').textContent = (young / tot * 100).toFixed(1) + '%';
+  document.getElementById('stOld').textContent = (old / tot * 100).toFixed(1) + '%';
+  document.getElementById('stMed').textContent = med.toFixed(1);
+
+  slider.value = year;
+  document.getElementById('pinBtn').setAttribute('aria-pressed', pinned !== null);
+  document.getElementById('pinBtn').textContent =
+    pinned === null ? 'Pin this year as outline' : `Unpin ${pinned} outline`;
+}
+
+function setYear(y, animate) {
+  year = Math.max(YMIN, Math.min(YMAX, y));
+  update(animate);
+}
+
+// tooltip
+svg.addEventListener('mousemove', e => {
+  const t = e.target;
+  if (!t.classList || !t.classList.contains('bar')) { tooltip.style.display = 'none'; return; }
+  const i = +t.dataset.i, male = t.dataset.s === 'm';
+  const d = DATA[year];
+  const v = d[male ? i : 18 + i];
+  let tot = 0; for (let k = 0; k < 36; k++) tot += d[k];
+  tooltip.innerHTML = `<b>${male ? 'Male' : 'Female'} ${AGE[i].replace(/ /g, '')}</b> &middot; ${year}
+    <div>People<span class="num">${fmtK(v)}</span></div>
+    <div class="sub">${(v / tot * 100).toFixed(1)}% of total population &middot; born ${i === 17 ? '≤' + (year - 85) : (year - AGE_HI[i]) + '–' + (year - AGE_LO[i])}</div>`;
+  tooltip.style.display = 'block';
+  const tw = tooltip.offsetWidth;
+  let px = e.clientX + 16, py = e.clientY - 20;
+  if (px + tw > window.innerWidth - 8) px = e.clientX - tw - 16;
+  tooltip.style.left = px + 'px';
+  tooltip.style.top = Math.max(8, py) + 'px';
+});
+svg.addEventListener('mouseleave', () => tooltip.style.display = 'none');
+
+// cohort tracking
+svg.addEventListener('click', e => {
+  const t = e.target;
+  if (!t.classList || !t.classList.contains('bar')) { cohort = null; update(false); return; }
+  const i = +t.dataset.i;
+  const bLo = year - AGE_HI[i], bHi = year - AGE_LO[i];
+  if (cohort && cohort.bLo === bLo && cohort.bHi === bHi) cohort = null;
+  else cohort = { bLo: Math.max(bLo, 1850), bHi };
+  update(false);
+});
+
+// play / pause
+const playBtn = document.getElementById('play');
+function stopPlay() {
+  playing = false;
+  clearInterval(playTimer);
+  playBtn.innerHTML = '&#9654;';
+  playBtn.setAttribute('aria-label', 'Play animation');
+}
+function togglePlay() {
+  if (playing) { stopPlay(); return; }
+  playing = true;
+  playBtn.innerHTML = '&#10074;&#10074;';
+  playBtn.setAttribute('aria-label', 'Pause animation');
+  if (year >= YMAX) setYear(YMIN, false);
+  const quick = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  playTimer = setInterval(() => {
+    if (year >= YMAX) { stopPlay(); return; }
+    setYear(year + 1, !quick);
+  }, quick ? 600 : 380);
+}
+playBtn.addEventListener('click', togglePlay);
+
+slider.addEventListener('input', () => { stopPlay(); setYear(+slider.value, false); });
+
+document.addEventListener('keydown', e => {
+  const panel = document.getElementById('tablepanel');
+  if (e.key === 'Escape') {
+    if (panel.classList.contains('open')) closeTable();
+    else { cohort = null; update(false); }
+    return;
+  }
+  if (e.target.tagName === 'INPUT' && e.key !== ' ') return;
+  if (e.key === 'ArrowLeft') { stopPlay(); setYear(year - 1, false); e.preventDefault(); }
+  if (e.key === 'ArrowRight') { stopPlay(); setYear(year + 1, false); e.preventDefault(); }
+  if (e.key === ' ') { togglePlay(); e.preventDefault(); }
+});
+
+// pin outline
+document.getElementById('pinBtn').addEventListener('click', () => {
+  pinned = (pinned === null) ? year : null;
+  update(false);
+});
+
+// slider decade ticks
+(function () {
+  const tr = document.getElementById('tickrow');
+  for (let y = 1970; y <= 2020; y += 10) {
+    const s = document.createElement('span');
+    s.textContent = y;
+    s.style.left = ((y - YMIN) / (YMAX - YMIN) * 100) + '%';
+    tr.appendChild(s);
+  }
+  [YMIN, YMAX].forEach(y => {
+    const s = document.createElement('span');
+    s.textContent = y;
+    s.style.left = ((y - YMIN) / (YMAX - YMIN) * 100) + '%';
+    s.style.fontWeight = '700';
+    tr.appendChild(s);
+  });
+})();
+
+// data table
+const panel = document.getElementById('tablepanel');
+const tableToggle = document.getElementById('tableToggle');
+function openTable() {
+  const d = DATA[year];
+  document.getElementById('tabletitle').textContent = `Population by age group, mid-${year} ('000)`;
+  let h = '<thead><tr><th>Age group</th><th>Male</th><th>Female</th><th>Total</th></tr></thead><tbody>';
+  let tm = 0, tf = 0;
+  for (let i = 17; i >= 0; i--) {
+    tm += d[i]; tf += d[18 + i];
+    h += `<tr><td>${AGE[i]}</td><td>${d[i].toFixed(1)}</td><td>${d[18 + i].toFixed(1)}</td><td>${(d[i] + d[18 + i]).toFixed(1)}</td></tr>`;
+  }
+  h += `<tr><td><b>All ages</b></td><td><b>${tm.toFixed(1)}</b></td><td><b>${tf.toFixed(1)}</b></td><td><b>${(tm + tf).toFixed(1)}</b></td></tr></tbody>`;
+  document.getElementById('datatable').innerHTML = h;
+  panel.classList.add('open');
+  tableToggle.setAttribute('aria-pressed', 'true');
+}
+function closeTable() {
+  panel.classList.remove('open');
+  tableToggle.setAttribute('aria-pressed', 'false');
+}
+tableToggle.addEventListener('click', openTable);
+document.getElementById('tableClose').addEventListener('click', closeTable);
+
+let rt;
+window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(build, 80); });
+build();
+</script>
+
+</body>
+</html>
