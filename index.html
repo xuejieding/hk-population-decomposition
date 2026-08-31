@@ -1,0 +1,619 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<title>Hong Kong Population Components</title>
+<style>
+  :root {
+    --bg: #FAFBFC;
+    --panel: #FFFFFF;
+    --ink: #1A212B;
+    --muted: #5A6472;
+    --faint: #8A93A0;
+    --grid: #E4E8ED;
+    --zero: #B9C0C9;
+    --border: #DDE2E8;
+    --births: #1A4E96;
+    --deaths: #A63A45;
+    --netmove: #B5862B;
+    --netline: #1A212B;
+    --hover-band: rgba(26, 33, 43, 0.05);
+    --tooltip-bg: #FFFFFF;
+    --tooltip-shadow: 0 6px 24px rgba(20, 28, 40, 0.18);
+    --btn-bg: #FFFFFF;
+    --btn-active-bg: #1A4E96;
+    --btn-active-ink: #FFFFFF;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #15181D;
+      --panel: #1C2027;
+      --ink: #E8EBF0;
+      --muted: #9AA4B2;
+      --faint: #6E7987;
+      --grid: #2A2F38;
+      --zero: #4A5260;
+      --border: #333A45;
+      --births: #3F82DE;
+      --deaths: #C24C58;
+      --netmove: #B8872A;
+      --netline: #E8EBF0;
+      --hover-band: rgba(232, 235, 240, 0.07);
+      --tooltip-bg: #232830;
+      --tooltip-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+      --btn-bg: #1C2027;
+      --btn-active-bg: #3F82DE;
+      --btn-active-ink: #10131A;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #15181D;
+    --panel: #1C2027;
+    --ink: #E8EBF0;
+    --muted: #9AA4B2;
+    --faint: #6E7987;
+    --grid: #2A2F38;
+    --zero: #4A5260;
+    --border: #333A45;
+    --births: #3F82DE;
+    --deaths: #C24C58;
+    --netmove: #B8872A;
+    --netline: #E8EBF0;
+    --hover-band: rgba(232, 235, 240, 0.07);
+    --tooltip-bg: #232830;
+    --tooltip-shadow: 0 6px 24px rgba(0, 0, 0, 0.5);
+    --btn-bg: #1C2027;
+    --btn-active-bg: #3F82DE;
+    --btn-active-ink: #10131A;
+  }
+
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  header {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+    padding: 22px 34px 8px;
+  }
+  .titles h1 {
+    margin: 0;
+    font-size: clamp(19px, 2.2vw, 30px);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  .titles p {
+    margin: 4px 0 0;
+    font-size: clamp(12px, 1.15vw, 15.5px);
+    color: var(--muted);
+  }
+  .controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--btn-bg);
+  }
+  .seg button {
+    appearance: none;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: 13.5px;
+    padding: 7px 14px;
+    cursor: pointer;
+  }
+  .seg button + button { border-left: 1px solid var(--border); }
+  .seg button.active {
+    background: var(--btn-active-bg);
+    color: var(--btn-active-ink);
+    font-weight: 600;
+  }
+  .chip-btn {
+    appearance: none;
+    font: inherit;
+    font-size: 13.5px;
+    padding: 7px 14px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--btn-bg);
+    color: var(--muted);
+    cursor: pointer;
+  }
+  .chip-btn[aria-pressed="true"] {
+    color: var(--ink);
+    border-color: var(--faint);
+    font-weight: 600;
+  }
+  .seg button:focus-visible, .chip-btn:focus-visible, #chart:focus-visible {
+    outline: 2px solid var(--births);
+    outline-offset: 2px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 22px;
+    padding: 6px 34px 2px;
+    font-size: clamp(12px, 1.15vw, 15px);
+    color: var(--muted);
+  }
+  .legend .item { display: inline-flex; align-items: center; gap: 8px; }
+  .legend .sw { width: 14px; height: 14px; border-radius: 3.5px; flex: none; }
+  .legend .ln {
+    width: 20px; height: 0; flex: none;
+    border-top: 2.5px solid var(--netline);
+  }
+  .legend .hint { color: var(--faint); font-size: 0.86em; }
+
+  #chartwrap { flex: 1; min-height: 0; padding: 0 18px 4px; position: relative; }
+  #chart { width: 100%; height: 100%; display: block; }
+  #chart:focus { outline: none; }
+
+  svg text {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    font-variant-numeric: tabular-nums;
+  }
+  .bar-seg { stroke: var(--bg); stroke-width: 1.6; }
+  .gridline { stroke: var(--grid); stroke-width: 1; }
+  .zeroline { stroke: var(--zero); stroke-width: 1.8; }
+  .ytick { fill: var(--muted); font-size: 13px; }
+  .xtick { fill: var(--muted); font-size: 13.5px; }
+  .axlab { fill: var(--faint); font-size: 12px; letter-spacing: 0.06em; }
+  .anno-line { stroke: var(--faint); stroke-width: 1.6; stroke-dasharray: 5 5; }
+  .anno-t1 { fill: var(--muted); font-size: 13px; font-weight: 700; letter-spacing: 0.05em; }
+  .anno-t2 { fill: var(--faint); font-size: 12px; }
+  .netpath { fill: none; stroke: var(--netline); stroke-width: 2; }
+  .netdot { fill: var(--netline); stroke: var(--bg); stroke-width: 1.4; }
+  .hoverband { fill: var(--hover-band); }
+
+  #tooltip {
+    position: fixed;
+    pointer-events: none;
+    background: var(--tooltip-bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--tooltip-shadow);
+    padding: 12px 14px;
+    font-size: 13.5px;
+    line-height: 1.5;
+    min-width: 215px;
+    z-index: 30;
+    display: none;
+  }
+  #tooltip .tt-year {
+    font-weight: 700;
+    font-size: 15px;
+    margin-bottom: 2px;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  #tooltip .tt-prov {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--netmove);
+    border: 1px solid var(--netmove);
+    border-radius: 99px;
+    padding: 0 7px;
+  }
+  #tooltip .tt-sub { color: var(--faint); font-size: 11.5px; margin-bottom: 8px; }
+  #tooltip table { border-collapse: collapse; width: 100%; }
+  #tooltip td { padding: 1.5px 0; }
+  #tooltip td:last-child {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+    font-weight: 600;
+    padding-left: 18px;
+  }
+  #tooltip .tt-dot {
+    display: inline-block;
+    width: 9px; height: 9px;
+    border-radius: 2.5px;
+    margin-right: 7px;
+  }
+  #tooltip tr.tt-net td {
+    border-top: 1px solid var(--border);
+    padding-top: 5px;
+  }
+  #tooltip tr.tt-rate td { color: var(--muted); font-weight: 400; }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+    padding: 6px 34px 14px;
+    font-size: 11.5px;
+    color: var(--faint);
+  }
+
+  #tablepanel {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 50;
+    display: none;
+    flex-direction: column;
+    padding: 22px 34px;
+  }
+  #tablepanel.open { display: flex; }
+  #tablepanel .tp-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  #tablepanel h2 { margin: 0; font-size: 20px; }
+  #tablepanel .tp-scroll {
+    flex: 1;
+    overflow: auto;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--panel);
+  }
+  #tablepanel table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 13.5px;
+    font-variant-numeric: tabular-nums;
+  }
+  #tablepanel th, #tablepanel td {
+    padding: 6px 16px;
+    text-align: right;
+    white-space: nowrap;
+  }
+  #tablepanel th:first-child, #tablepanel td:first-child { text-align: left; }
+  #tablepanel thead th {
+    position: sticky;
+    top: 0;
+    background: var(--panel);
+    border-bottom: 2px solid var(--border);
+    font-weight: 600;
+    color: var(--muted);
+  }
+  #tablepanel tbody tr:nth-child(even) { background: var(--hover-band); }
+  #tablepanel .neg { color: var(--deaths); }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .bar-seg, .netpath, .netdot { transition: opacity 0.15s ease; }
+  }
+</style>
+
+<header>
+  <div class="titles">
+    <h1>What drives Hong Kong&rsquo;s population change?</h1>
+    <p>Births, deaths and net movement of residents, mid-year to mid-year, in thousands &middot; 1962&ndash;2026</p>
+  </div>
+  <div class="controls">
+    <div class="seg" role="group" aria-label="Period">
+      <button data-from="1962" class="active">1962&ndash;2026</button>
+      <button data-from="1997">1997&ndash;2026</button>
+      <button data-from="2011">2011&ndash;2026</button>
+    </div>
+    <button class="chip-btn" id="netToggle" aria-pressed="true">Net change line</button>
+    <button class="chip-btn" id="tableToggle" aria-pressed="false">Data table</button>
+  </div>
+</header>
+
+<div class="legend" aria-hidden="true">
+  <span class="item"><span class="sw" style="background:var(--births)"></span>Births</span>
+  <span class="item"><span class="sw" style="background:var(--deaths)"></span>Deaths</span>
+  <span class="item"><span class="sw" style="background:var(--netmove)"></span>Net movement <span class="hint">(inflow &minus; outflow, can be either side of zero)</span></span>
+  <span class="item" id="legNet"><span class="ln"></span>Net population change</span>
+  <span class="item hint">Hover or use &larr; &rarr; keys to step through years</span>
+</div>
+
+<div id="chartwrap">
+  <svg id="chart" tabindex="0" role="img"
+       aria-label="Diverging stacked bar chart of Hong Kong population change components, 1962 to 2026. Open the data table for exact figures."></svg>
+  <div id="tooltip"></div>
+</div>
+
+<footer>
+  <span>Source: Census and Statistics Department, HKSAR, Table 110-01003 (mid-year reference). 2026 figures are provisional (released 18 Aug 2026).</span>
+  <span>1961&ndash;1996 &ldquo;extended de facto&rdquo; method; 1997 onwards &ldquo;resident population&rdquo; method.</span>
+</footer>
+
+<div id="tablepanel" role="dialog" aria-label="Data table">
+  <div class="tp-head">
+    <h2>Population change by component, &rsquo;000</h2>
+    <button class="chip-btn" id="tableClose">Close &times;</button>
+  </div>
+  <div class="tp-scroll"><table id="datatable"></table></div>
+</div>
+
+<script>
+// [year, births, deaths, netMovement, growth, rate%, provisional]
+const DATA = [[1962,111.6,19.1,44.6,137.1,4.3,0],[1963,116.0,21.8,21.5,115.7,3.5,0],[1964,110.5,18.8,-8.0,83.7,2.4,0],[1965,105.7,18.7,6.3,93.3,2.7,0],[1966,96.8,18.6,-46.2,32.0,0.9,0],[1967,88.0,20.0,24.9,92.9,2.6,0],[1968,85.1,19.5,14.3,79.9,2.1,0],[1969,83.5,19.3,-3.0,61.2,1.6,0],[1970,79.7,19.7,35.1,95.1,2.5,0],[1971,80.2,20.0,26.1,86.3,2.2,0],[1972,79.6,21.0,19.7,78.3,1.9,0],[1973,81.9,20.9,57.0,118.0,2.9,0],[1974,82.5,22.6,76.3,136.2,3.2,0],[1975,83.0,20.8,21.6,83.8,1.9,0],[1976,77.7,22.6,1.3,56.4,1.3,0],[1977,80.2,23.1,8.6,65.7,1.5,0],[1978,79.2,23.2,27.8,83.8,1.8,0],[1979,82.3,24.1,204.0,262.2,5.6,0],[1980,83.3,25.9,76.0,133.4,2.7,0],[1981,85.5,24.1,58.9,120.3,2.4,0],[1982,87.1,25.3,19.3,81.1,1.6,0],[1983,84.9,26.9,22.6,80.6,1.5,0],[1984,80.5,25.8,-1.9,52.8,1.0,0],[1985,77.1,25.1,6.3,58.3,1.1,0],[1986,74.3,25.4,19.5,68.4,1.3,0],[1987,70.9,25.9,10.9,55.9,1.0,0],[1988,70.0,27.8,4.9,47.1,0.8,0],[1989,75.3,28.1,11.4,58.6,1.0,0],[1990,68.3,29.0,-21.0,18.3,0.3,0],[1991,67.4,28.3,8.4,47.5,0.8,0],[1992,69.7,30.7,9.5,48.5,0.8,0],[1993,71.3,30.2,59.4,100.5,1.7,0],[1994,70.6,30.0,93.8,134.4,2.3,0],[1995,71.1,30.7,80.3,120.7,2.0,0],[1996,66.3,31.3,119.9,154.9,2.5,0],[1997,63.2,31.4,22.0,53.8,0.8,0],[1998,55.1,32.3,31.6,54.4,0.8,0],[1999,52.1,33.0,43.7,62.8,1.0,0],[2000,51.1,34.2,41.6,58.5,0.9,0],[2001,53.1,32.5,28.7,49.3,0.7,0],[2002,47.1,34.3,17.0,29.8,0.4,0],[2003,48.6,36.1,-25.8,-13.3,-0.2,0],[2004,46.1,36.6,43.2,52.7,0.8,0],[2005,54.1,38.7,14.3,29.7,0.4,0],[2006,60.3,36.9,20.5,43.9,0.6,0],[2007,67.4,38.8,30.6,59.2,0.9,0],[2008,75.0,41.2,7.7,41.5,0.6,0],[2009,81.3,40.5,-25.8,15.0,0.2,0],[2010,84.7,42.1,8.8,51.4,0.7,0],[2011,95.3,42.7,-5.2,47.4,0.7,0],[2012,93.2,43.6,29.0,78.5,1.1,0],[2013,74.3,42.4,-3.1,28.8,0.4,0],[2014,58.8,45.4,37.3,50.7,0.7,0],[2015,62.5,45.6,44.8,61.7,0.9,0],[2016,59.8,46.7,32.2,45.3,0.6,0],[2017,59.5,45.4,42.4,56.6,0.8,0],[2018,55.0,47.9,52.3,59.4,0.8,0],[2019,53.3,47.6,49.7,55.3,0.7,0],[2020,49.5,49.5,-27.0,-26.9,-0.4,0],[2021,38.5,51.1,-55.3,-67.9,-0.9,0],[2022,35.1,61.6,-40.4,-67.0,-0.9,0],[2023,32.6,54.6,212.0,190.0,2.6,0],[2024,34.4,52.4,6.0,-12.0,-0.2,0],[2025,35.2,50.0,-10.4,-25.2,-0.3,0],[2026,29.7,50.1,39.8,19.4,0.3,1]];
+
+const svg = document.getElementById('chart');
+const wrap = document.getElementById('chartwrap');
+const tooltip = document.getElementById('tooltip');
+const NS = 'http://www.w3.org/2000/svg';
+
+let fromYear = 1962;
+let showNet = true;
+let selected = null;   // selected year (keyboard/hover)
+let layout = null;     // computed positions for hit-testing
+
+const fmt = v => (v < 0 ? '−' : '') + Math.abs(v).toLocaleString('en', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+const fmtSigned = v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toLocaleString('en', {minimumFractionDigits: 1, maximumFractionDigits: 1});
+
+function el(name, attrs, parent) {
+  const n = document.createElementNS(NS, name);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  (parent || svg).appendChild(n);
+  return n;
+}
+
+function css(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+
+function draw() {
+  svg.innerHTML = '';
+  const W = wrap.clientWidth, H = wrap.clientHeight;
+  if (W < 50 || H < 50) return;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  const rows = DATA.filter(d => d[0] >= fromYear);
+  const M = { top: 34, right: 24, bottom: 40, left: 58 };
+  const pw = W - M.left - M.right, ph = H - M.top - M.bottom;
+
+  // y domain from stacked extents, padded and rounded to 50s
+  let yMax = 0, yMin = 0;
+  for (const [, b, d, m] of rows) {
+    yMax = Math.max(yMax, b + Math.max(m, 0));
+    yMin = Math.min(yMin, -d + Math.min(m, 0));
+  }
+  yMax = Math.ceil((yMax * 1.08) / 50) * 50;
+  yMin = Math.floor((yMin * 1.15) / 50) * 50;
+  const y = v => M.top + (yMax - v) / (yMax - yMin) * ph;
+
+  const n = rows.length;
+  const step = pw / n;
+  const barW = Math.max(3, step - Math.max(2, step * 0.18));
+  const x = i => M.left + i * step + (step - barW) / 2;
+  const xc = i => M.left + i * step + step / 2;
+
+  layout = { rows, M, step, y, xc, W, H };
+
+  // gridlines & labels
+  const gtick = Math.abs(yMax - yMin) > 320 ? 100 : 50;
+  for (let v = Math.ceil(yMin / gtick) * gtick; v <= yMax; v += gtick) {
+    if (v === 0) continue;
+    el('line', { x1: M.left, x2: W - M.right, y1: y(v), y2: y(v), class: 'gridline' });
+    el('text', { x: M.left - 9, y: y(v) + 4, 'text-anchor': 'end', class: 'ytick' }).textContent = v;
+  }
+  el('text', { x: M.left - 9, y: M.top - 14, 'text-anchor': 'end', class: 'axlab' }).textContent = "'000";
+
+  // x ticks: decades + last year
+  const lastYr = rows[n - 1][0];
+  for (let i = 0; i < n; i++) {
+    const yr = rows[i][0];
+    const isTick = (fromYear >= 2011) ? (yr % 2 === 1 || yr === lastYr)
+                 : (fromYear >= 1997) ? (yr % 5 === 0 || yr === lastYr || yr === 1997)
+                 : (yr % 10 === 1 || yr === lastYr);
+    if (isTick) {
+      el('text', { x: xc(i), y: H - M.bottom + 24, 'text-anchor': 'middle', class: 'xtick' }).textContent = yr;
+    }
+  }
+
+  // hover band (behind bars)
+  const band = el('rect', { class: 'hoverband', y: M.top, height: ph, width: step, x: 0, visibility: 'hidden' });
+
+  // bars
+  for (let i = 0; i < n; i++) {
+    const [yr, b, d, m] = rows[i];
+    const bx = x(i);
+    el('rect', { x: bx, width: barW, y: y(b), height: y(0) - y(b), fill: 'var(--births)', class: 'bar-seg', 'data-yr': yr });
+    el('rect', { x: bx, width: barW, y: y(0), height: y(-d) - y(0), fill: 'var(--deaths)', class: 'bar-seg', 'data-yr': yr });
+    if (m >= 0.05) {
+      el('rect', { x: bx, width: barW, y: y(b + m), height: y(0) - y(m), fill: 'var(--netmove)', class: 'bar-seg', 'data-yr': yr });
+    } else if (m <= -0.05) {
+      el('rect', { x: bx, width: barW, y: y(-d), height: y(m) - y(0), fill: 'var(--netmove)', class: 'bar-seg', 'data-yr': yr });
+    }
+  }
+
+  // zero line above bars
+  el('line', { x1: M.left, x2: W - M.right, y1: y(0), y2: y(0), class: 'zeroline' });
+
+  // handover marker
+  const hi = rows.findIndex(r => r[0] === 1997);
+  if (hi > 0) {
+    const hx = M.left + hi * step;
+    el('line', { x1: hx, x2: hx, y1: M.top - 4, y2: H - M.bottom, class: 'anno-line' });
+    const t1 = el('text', { x: hx - 7, y: M.top + 8, 'text-anchor': 'end', class: 'anno-t1' });
+    t1.textContent = 'HANDOVER';
+    const t2 = el('text', { x: hx - 7, y: M.top + 24, 'text-anchor': 'end', class: 'anno-t2' });
+    t2.textContent = '1 July 1997';
+  }
+
+  // inflow-wave annotations
+  const annotate = (yr, lines, anchor) => {
+    const i = rows.findIndex(r => r[0] === yr);
+    if (i < 0 || step < 9) return;
+    const [, b, , m] = rows[i];
+    const topY = y(b + Math.max(m, 0));
+    let ax = xc(i), ta = anchor;
+    lines.forEach((s, k) => {
+      const t = el('text', {
+        x: ax + (ta === 'end' ? -10 : ta === 'start' ? 10 : 0),
+        y: topY - 24 + k * 16, 'text-anchor': ta,
+        class: k === 0 ? 'anno-t1' : 'anno-t2'
+      });
+      t.textContent = s;
+    });
+  };
+  if (fromYear <= 1979) annotate(1979, ['+204,000', 'net inflow'], 'middle');
+  annotate(2023, ['+212,000', 'net inflow'], fromYear >= 2011 ? 'middle' : 'end');
+
+  // net change line
+  if (showNet) {
+    let path = '';
+    for (let i = 0; i < n; i++) path += (i ? 'L' : 'M') + xc(i) + ' ' + y(rows[i][4]);
+    el('path', { d: path, class: 'netpath' });
+    const r = step > 14 ? 3.4 : step > 8 ? 2.6 : 0;
+    if (r) for (let i = 0; i < n; i++) {
+      el('circle', { cx: xc(i), cy: y(rows[i][4]), r, class: 'netdot' });
+    }
+  }
+
+  svg._band = band;
+  if (selected !== null) highlight(selected, null);
+}
+
+function rowFor(year) { return layout.rows.find(r => r[0] === year); }
+
+function highlight(year, mouse) {
+  const r = rowFor(year);
+  if (!r || !layout) { hideTip(); return; }
+  const i = layout.rows.indexOf(r);
+  const band = svg._band;
+  band.setAttribute('x', layout.M.left + i * layout.step);
+  band.setAttribute('visibility', 'visible');
+
+  const [yr, b, d, m, g, rate, prov] = r;
+  tooltip.innerHTML = `
+    <div class="tt-year">Mid-${yr - 1} → mid-${yr}${prov ? '<span class="tt-prov">provisional</span>' : ''}</div>
+    <div class="tt-sub">thousands of people</div>
+    <table>
+      <tr><td><span class="tt-dot" style="background:var(--births)"></span>Births</td><td>+${fmt(b)}</td></tr>
+      <tr><td><span class="tt-dot" style="background:var(--deaths)"></span>Deaths</td><td>−${fmt(d)}</td></tr>
+      <tr><td><span class="tt-dot" style="background:var(--netmove)"></span>Net movement</td><td>${fmtSigned(m)}</td></tr>
+      <tr class="tt-net"><td>Net change</td><td>${fmtSigned(g)}</td></tr>
+      <tr class="tt-rate"><td>Growth rate</td><td>${fmtSigned(rate)}%</td></tr>
+    </table>`;
+  tooltip.style.display = 'block';
+
+  const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+  let px, py;
+  if (mouse) {
+    px = mouse.clientX + 18; py = mouse.clientY - th / 2;
+  } else {
+    const rect = svg.getBoundingClientRect();
+    px = rect.left + layout.M.left + (i + 1) * layout.step + 12;
+    py = rect.top + layout.M.top + 40;
+  }
+  if (px + tw > window.innerWidth - 10) px = (mouse ? mouse.clientX : px) - tw - 18;
+  py = Math.max(8, Math.min(py, window.innerHeight - th - 8));
+  tooltip.style.left = px + 'px';
+  tooltip.style.top = py + 'px';
+}
+
+function hideTip() {
+  tooltip.style.display = 'none';
+  if (svg._band) svg._band.setAttribute('visibility', 'hidden');
+}
+
+svg.addEventListener('mousemove', e => {
+  if (!layout) return;
+  const rect = svg.getBoundingClientRect();
+  const mx = e.clientX - rect.left;
+  const i = Math.floor((mx - layout.M.left) / layout.step);
+  if (i < 0 || i >= layout.rows.length) { selected = null; hideTip(); return; }
+  selected = layout.rows[i][0];
+  highlight(selected, e);
+});
+svg.addEventListener('mouseleave', () => { selected = null; hideTip(); });
+
+svg.addEventListener('keydown', e => {
+  if (!layout) return;
+  if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Escape') return;
+  e.preventDefault();
+  if (e.key === 'Escape') { selected = null; hideTip(); return; }
+  const years = layout.rows.map(r => r[0]);
+  if (selected === null) {
+    selected = e.key === 'ArrowRight' ? years[0] : years[years.length - 1];
+  } else {
+    const i = years.indexOf(selected);
+    const j = Math.max(0, Math.min(years.length - 1, i + (e.key === 'ArrowRight' ? 1 : -1)));
+    selected = years[j];
+  }
+  highlight(selected, null);
+});
+
+document.querySelectorAll('.seg button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.seg button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    fromYear = +btn.dataset.from;
+    if (selected !== null && selected < fromYear) selected = null;
+    hideTip();
+    draw();
+  });
+});
+
+const netToggle = document.getElementById('netToggle');
+netToggle.addEventListener('click', () => {
+  showNet = !showNet;
+  netToggle.setAttribute('aria-pressed', showNet);
+  document.getElementById('legNet').style.opacity = showNet ? 1 : 0.35;
+  draw();
+});
+
+const panel = document.getElementById('tablepanel');
+const tableToggle = document.getElementById('tableToggle');
+function buildTable() {
+  const t = document.getElementById('datatable');
+  if (t.innerHTML) return;
+  let h = `<thead><tr><th>Period (mid-year to mid-year)</th><th>Births</th><th>Deaths</th>
+    <th>Natural change</th><th>Net movement</th><th>Net change</th><th>Growth rate</th></tr></thead><tbody>`;
+  for (const [yr, b, d, m, g, r, p] of DATA) {
+    const nat = +(b - d).toFixed(1);
+    const cls = v => v < 0 ? ' class="neg"' : '';
+    h += `<tr><td>${yr - 1}–${yr}${p ? ' (provisional)' : ''}</td><td>${fmt(b)}</td><td>${fmt(d)}</td>
+      <td${cls(nat)}>${fmtSigned(nat)}</td><td${cls(m)}>${fmtSigned(m)}</td>
+      <td${cls(g)}>${fmtSigned(g)}</td><td${cls(r)}>${fmtSigned(r)}%</td></tr>`;
+  }
+  t.innerHTML = h + '</tbody>';
+}
+tableToggle.addEventListener('click', () => {
+  buildTable();
+  panel.classList.add('open');
+  tableToggle.setAttribute('aria-pressed', 'true');
+});
+document.getElementById('tableClose').addEventListener('click', () => {
+  panel.classList.remove('open');
+  tableToggle.setAttribute('aria-pressed', 'false');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && panel.classList.contains('open')) {
+    panel.classList.remove('open');
+    tableToggle.setAttribute('aria-pressed', 'false');
+  }
+});
+
+let rt;
+window.addEventListener('resize', () => { clearTimeout(rt); rt = setTimeout(draw, 80); });
+if (window.matchMedia) {
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', draw);
+}
+draw();
+</script>
+
+</body>
+</html>
