@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<meta name="description" content="Role cards for a CCCH9015 classroom game on work and family in Hong Kong.">
+<title>Can We Build a Life Together?</title>
+<style>:root{
+  --bg:#FFFFFF;--ink:#1E2A3B;--muted:#5E6878;--navy:#14285A;--line:#E3E7EE;--panel:#F6F8FB;
+  --A:#2457B0;--A-t:#EAF1FB;--B:#A3323A;--B-t:#FBEDEE;--C:#2E6B45;--C-t:#ECF5EE;--D:#A0620F;--D-t:#FCF3E6;
+  --serif:Georgia,"Times New Roman",serif;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#12161D;--ink:#E8ECF2;--muted:#A2ABB9;--navy:#C9D6F5;--line:#2A313C;--panel:#1A2029;
+    --A:#8FB2F0;--A-t:#1B2740;--B:#EE9AA0;--B-t:#3A1E22;--C:#8FCFA5;--C-t:#18301F;--D:#E9B86A;--D-t:#3A2A12;
+  }
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 var(--sans)}
+main{max-width:640px;margin:0 auto;padding:20px 16px 48px}
+a{color:inherit}
+h1,h2,h3{font-family:var(--serif);color:var(--navy);line-height:1.2;margin:0}
+h1{font-size:30px}
+h2{font-size:22px;margin:28px 0 10px}
+.kicker{font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin:0 0 8px}
+.sub{font-family:var(--serif);font-size:19px;color:var(--muted);margin:6px 0 16px}
+.lead{margin:0 0 8px}
+ol.steps{padding-left:22px;margin:8px 0}
+ol.steps li{margin:6px 0}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0 8px}
+.hh{display:block;text-decoration:none;border-radius:14px;padding:18px 16px;background:var(--t);border:2px solid var(--a)}
+.hh .letter{font-family:var(--serif);font-size:40px;line-height:1;color:var(--a);font-weight:bold}
+.hh .lbl{display:block;margin-top:6px;font-size:15px;color:var(--ink)}
+.trio{display:block;text-decoration:none;text-align:center;border:1px dashed var(--muted);border-radius:12px;padding:12px;margin:4px 0 12px;color:var(--ink)}
+.small{font-size:14px;color:var(--muted)}
+.back{display:inline-block;font-size:15px;color:var(--muted);text-decoration:none;margin-bottom:14px}
+.back:hover{text-decoration:underline}
+.role-btn{display:block;text-decoration:none;border-radius:14px;padding:16px;margin:12px 0;background:var(--t);border:2px solid var(--a)}
+.role-btn b{display:block;font-family:var(--serif);font-size:22px;color:var(--a)}
+.role-btn span{font-size:15px}
+.warn{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;font-size:15px;margin:12px 0}
+.card-head{border-radius:16px;padding:18px 16px;background:var(--t);margin-bottom:14px}
+.chip{display:inline-block;font-weight:bold;font-size:14px;color:var(--bg);background:var(--a);border-radius:999px;padding:2px 10px;margin-bottom:8px}
+.card-head h1{font-size:32px}
+.card-head .role{font-size:17px;color:var(--ink);margin-top:4px}
+.together{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:0 0 16px;background:var(--panel)}
+.together b,.sec b{display:block;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--a);margin-bottom:2px}
+.sec{margin:0 0 14px}
+.sec p{margin:0}
+.ask{border-radius:12px;padding:12px 14px;margin:18px 0 12px;background:var(--t)}
+.ask b{display:block;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--a)}
+.ask q{font-family:var(--serif);font-size:19px;quotes:"“" "”"}
+.protect{border:2px solid var(--a);border-radius:12px;padding:12px 14px;margin:12px 0 18px}
+.protect b{display:block;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--a)}
+.protect p{margin:2px 0 0;font-weight:600}
+.intro{font-family:var(--serif);font-size:18px;color:var(--navy);margin:8px 0 18px}
+details{border:1px solid var(--line);border-radius:12px;margin:10px 0;background:var(--bg)}
+summary{cursor:pointer;padding:12px 14px;font-weight:600;color:var(--navy);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";float:right;color:var(--muted)}
+details[open] summary::after{content:"−"}
+details .body{padding:0 14px 12px}
+details ol,details ul{padding-left:20px;margin:6px 0}
+details li{margin:6px 0}
+.timing{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.timing span{background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:14px}
+.opt{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;margin:6px 0}
+.opt b{font-family:var(--serif);color:var(--navy)}
+footer{margin-top:28px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:12px}</style>
+</head>
+<body>
+<main id="app"><p>Loading… If nothing appears, please enable JavaScript.</p></main>
+<script id="data" type="application/json">{"meta": {"course_line": "CCCH9015 • Week 6 • Work–family game", "title": "Can We Build a Life Together?", "subtitle": "A work–family negotiation game", "url": "https://xuejieding.github.io/hk-population-decomposition/life.html"}, "lead": "It is a few years from now. You and your partner have been together for a while, and you are asking a serious question: could we realistically build a life together? This is not about attraction, or about who is a good person. It is about whether the lives on your two cards can fit.", "howto": ["Pair up with the person next to you. If the class has an odd number, your teacher will make one household of three.", "Tap the letter your teacher gave your pair.", "The person on the LEFT opens Card 1. The person on the RIGHT opens Card 2. In a household of three, the third person opens Card 3.", "Read only your own card. Don’t show your screen: tell your partner who you are, in character."], "backup_rule": "No letter? Use the birth month of the person on the left: Jan–Mar A · Apr–Jun B · Jul–Sep C · Oct–Dec D.", "intro_prompt": "Introduce yourself in character: who you are, what you do, what your working week looks like, and the future you imagine.", "timing": [["Read your card", "3 min"], ["Introduce yourselves", "3 min"], ["Negotiate", "16 min"], ["Decide", "3 min"]], "rules": [{"title": "Stay in character", "text": "You can compromise and you can change your mind, but say what persuaded you."}, {"title": "Don’t invent resources, and speak for yourself", "text": "If it isn’t on your card, it doesn’t exist: no extra money, flats, helpers, helpful grandparents or flexible employers. Anything in the Hong Kong reality check can be paid for. Never promise your partner’s (or a parent’s) time, money, home or job change: ask them."}, {"title": "You don’t have to make it work", "text": "Finish with YES, MAYBE or NO and one main reason. YES needs both of you. MAYBE needs “if … by when”. NO names what couldn’t fit. There are no extra marks for staying together."}], "questions": [{"title": "Housing", "text": "Where would you live? Rent or buy? How much does owning matter to each of you? Does a job or a parent fix the location?"}, {"title": "Work & careers", "text": "How much does progression matter? Are long or irregular hours acceptable? Would either of you cut hours, turn down a promotion, change jobs or move?"}, {"title": "Children & care", "text": "Do you want children? When, and how many? Don’t stop at “50/50”: do the Tuesday test."}, {"title": "Parents & extended family", "text": "What do you expect to give your parents as they age: time, money, living nearby, living together?"}, {"title": "What matters most", "text": "Each card names one thing that person wants to protect. Take it seriously."}], "tuesday_test": {"title": "The Tuesday test", "text": "Take a Tuesday when your child is 18 months old. Who covers 7–9 am, 9 am–6 pm, 6–10 pm and the night? Your child has a fever on a workday: who stays home?"}, "reality": [{"label": "Live-in domestic helper", "text": "About HK$7,000 a month in total (minimum wage HK$5,220 for new contracts, plus food and insurance). The helper must live in your home, with their own place to sleep: not the living room or a corridor."}, {"label": "Full-day childcare (under 3)", "text": "About HK$6,000–10,000 a month, roughly 8 am–6 pm. Places near home often have a waiting list."}, {"label": "Renting", "text": "Two bedrooms (about 450 sq ft): HK$20,000–25,000 in the urban area, HK$13,000–17,000 in the New Territories. Three bedrooms with space for a helper (about 700 sq ft), urban: HK$35,000 or more."}, {"label": "Buying", "text": "A HK$6 million flat needs a deposit of HK$600,000–1.2 million, then about HK$22,000–25,000 a month in mortgage payments."}, {"label": "Care home for an older person", "text": "Private: about HK$10,000–20,000 a month. Subsidised places usually mean waiting a year or more."}], "reality_note": "Rough teaching figures, not official prices.", "stress_test": {"title": "Finished early? Stress-test your plan", "items": ["Who does the 7 am school run?", "Who stays home when your child is sick?", "Who takes a parent to the clinic on a weekday morning?", "If this arrangement stops working, whose job changes first?", "What would your character regret in ten years?"]}, "decision": {"title": "Your decision", "options": [["YES", "both of you agree"], ["MAYBE", "it could work if … by when"], ["NO", "name what couldn’t fit"]], "after": "Agree on one main reason. Be ready to raise your hand."}, "disclaimer": "The people, incomes and circumstances are fictional teaching examples, not averages, advice or official policy. Most incomes here are above the median for 25–34-year-olds in Hong Kong (about HK$23,000 a month). You never need to share your own relationship or family.", "households": [{"id": "A", "together": "You have been together for five years and rent a two-bedroom, 450 sq ft flat in Sai Ying Pun for HK$24,000 a month, split 50/50. If a baby took the second bedroom, a live-in helper would have nowhere to sleep.", "cards": [{"id": "A1", "name": "Kit Chan", "age": 31, "role": "Investment banking associate", "sections": [["Work", "HK$90,000 a month plus a yearly bonus. 65–75 hours a week: late nights, many weekends, and deals that wreck plans at short notice. About one week a month in Singapore or Shanghai. No working from home."], ["A decision you face", "Your managing director says you are on track for Vice-President within two years, “if you keep this pace”. A headhunter has also offered you an in-house finance job at a large company: HK$60,000, about 45 hours, weekends free. You must reply by the end of the month."], ["Money", "HK$1.2 million in savings."], ["Family", "Your parents live in Vancouver. They visit once a year, cannot help with childcare and don’t need money from you."], ["Children", "You want two: “once I’ve made VP, in four or five years”."]], "ask_to": "Jo", "ask": "If a helper covers the evenings, what exactly is missing?", "protect": "Making VP. You have worked towards it since university, and you believe the next two years decide your career."}, {"id": "A2", "name": "Jo Wong", "age": 31, "role": "Secondary school teacher", "sections": [["Work", "HK$46,000 a month at an aided school in Kwun Tong. In term, about 50 hours a week: at school 7:30 am–5 pm, then marking at home in the evening. Most school holidays are free. No working from home in term."], ["A decision you face", "Your principal wants to promote you to senior teacher and head of department next September: about HK$5,000 more a month, but more meetings, evening events and some Saturdays."], ["Money", "HK$300,000 in savings. You give your mother HK$5,000 a month."], ["Family", "Your mother (63) is widowed and lives alone in Lam Tin. She has offered to look after a baby two or three days a week, but a bad back means she cannot carry a baby for long."], ["Children", "You want two, and the first before you turn 33."]], "ask_to": "Kit", "ask": "What would you change at work, not just pay for?", "protect": "Being an equal partner. You will not become the “default parent” just because your job looks more flexible."}]}, {"id": "B", "together": "You have been together for four years and plan to marry next year. You rent a 380 sq ft one-bedroom flat in Mong Kok for HK$15,000 a month, split 50/50. You have no children.", "cards": [{"id": "B1", "name": "Jordan Lee", "age": 30, "role": "Product manager at a tech company", "sections": [["Work", "HK$52,000 a month. About 45 hours a week, mostly 9:30 am–7 pm, with some evening calls. You may work from home two days a week."], ["A decision you face", "You have been offered a promotion to lead a new team in Qianhai, Shenzhen: HK$70,000 a month, in the Shenzhen office four days a week, starting in six months. The company would pay half your Shenzhen rent for two years. If you say no, a similar job in Hong Kong is unlikely for several years."], ["Money", "HK$500,000 in savings."], ["Family", "Your parents retired to Futian, Shenzhen. They would look after a baby on weekdays, but only if you live in Shenzhen. They will not move back to Hong Kong."], ["Children", "You want one child within three years. A three-bedroom flat near your parents rents for about HK$12,000: much more space than you could have in Hong Kong."]], "ask_to": "Casey", "ask": "If not my parents, then who?", "protect": "This promotion. It is the step you have been working towards for five years."}, {"id": "B2", "name": "Casey Ho", "age": 30, "role": "Registered social worker", "sections": [["Work", "HK$40,000 a month at an NGO elderly centre in Sham Shui Po: 9 am–6 pm, Monday to Friday, plus one Saturday a month. No working from home. Your job and your registration are in Hong Kong; social work in Shenzhen would mean starting again. From Futian, your centre is 60–90 minutes away."], ["A decision you face", "Your supervisor wants to recommend you to run the centre from next year (about HK$48,000)."], ["Money", "HK$200,000 in savings. You give your parents HK$6,000 a month."], ["Family", "Your father (67) had a stroke last year; your mother (64) is his main carer. Your only sibling works in Singapore. You take your father to physiotherapy every Saturday and visit two evenings a week."], ["Children", "Honestly, you are not sure you want children: caring for your father has shown you how care can take over a life. If you did have one, you would want them to grow up in Hong Kong, near your parents."]], "ask_to": "Jordan", "ask": "Would you turn down Qianhai to stay near my parents?", "protect": "Being close enough to help your parents every week."}]}, {"id": "C", "together": "You have been together for four years and want to marry next year. Wing lives with Wing’s mother in her public-housing flat in Kwun Tong; Robin lives with Robin’s parents in Tai Po. Together you have saved HK$800,000 towards a home.", "cards": [{"id": "C1", "name": "Wing Lau", "age": 32, "role": "Senior accountant at an audit firm", "sections": [["Work", "HK$48,000 a month, about 50 hours a week; 70 hours and Saturdays in busy season (January–April). No working from home."], ["A decision you face", "Because of your mother’s appointments, your manager has offered you a four-day week for one year at 80% pay (HK$38,400). You haven’t decided."], ["Money", "HK$500,000 of the couple’s savings is yours. You give your mother HK$6,000 a month."], ["Family", "You are an only child. Your mother (66), widowed, has diabetes and has started forgetting things: twice she missed her medicine, once she got lost coming home. She needs the clinic two weekday mornings a month. She would love to look after a grandchild, and she has said she does not want to leave her flat."], ["Children & home", "You want a child within two years, partly so your mother can enjoy a grandchild while she is well. You’d like to buy near her, or a flat big enough for her to move in later."]], "ask_to": "Robin", "ask": "Could your work-from-home days cover Mum’s clinic mornings?", "protect": "Caring for your mother yourself. You promised your father she would never be left alone or sent to a care home."}, {"id": "C2", "name": "Robin Cheung", "age": 31, "role": "Data analyst at a bank", "sections": [["Work", "HK$45,000 a month. About 45 hours a week, 9 am–6 pm. You may work from home two days a week, but on those days you must still be online 9–6."], ["A decision you face", "You have been offered team lead (HK$55,000), but it ends working from home and adds two evening calls a week with London."], ["Money", "HK$300,000 of the couple’s savings is yours. You give your parents HK$4,000 a month."], ["Family", "Your parents (both 63) are healthy, retired and love to travel. They want grandchildren but have been clear they will not do daily childcare: “We raised three children. Now it’s our turn.” They could help one day a week. Your two older siblings are married with children of their own."], ["Children & home", "You want one child too, after you have a home of your own."]], "ask_to": "Wing", "ask": "Where do we live, and whose rules?", "protect": "A home of your own as a couple: your own space and your own household rules, not living with either set of parents."}, {"id": "C3", "name": "Lau Mei-fong", "age": 66, "role": "Wing’s mother", "trio_only": true, "sections": [["Your life", "Widowed. You have lived in the same public-housing flat in Kwun Tong for 30 years; your friends, your morning exercise group and your temple are all nearby. You live on the Old Age Living Allowance plus the HK$6,000 Wing gives you each month."], ["Health", "Diabetes, controlled with medicine. You know you sometimes forget things, but you think everyone your age does."], ["Your view", "You would love to look after a grandchild at your flat on weekdays. You do not want to move in with the couple: “I don’t want to live by someone else’s rules, or be a burden.” You don’t want a live-in helper in your small flat. You worry Wing is giving up too much for you."], ["At the table", "You decide what you offer. Nobody can promise your time, your flat or your money for you."]], "ask_to": "both of them", "ask": "What exactly do you expect from me, and for how many years?", "protect": "Your independence, and a real place in your grandchild’s life.", "intro": "Introduce yourself in character: who you are, how you spend your days, and what you hope for your family.", "together_label": "The couple", "together": "Wing and Robin have been together for four years and want to marry next year. Wing lives with you in your public-housing flat in Kwun Tong; Robin lives with Robin’s parents in Tai Po. Together they have saved HK$800,000 towards a home."}]}, {"id": "D", "together": "You have been together for six years and married last year. You live with Chris’s parents in their 400 sq ft two-bedroom flat in Tin Shui Wai, in Chris’s old bedroom. You have entered the Home Ownership Scheme ballot twice and lost both times. Family income must be under HK$60,000 a month; the next round is next year, and a flat would need a deposit of roughly HK$300,000. Together you have saved HK$150,000.", "cards": [{"id": "D1", "name": "Chris Ng", "age": 29, "role": "Railway maintenance technician", "sections": [["Work", "HK$30,000 a month, including a night-shift allowance. You work 12:30–6:30 am, five nights a week, often including weekends, and sleep roughly 8 am–3 pm."], ["A decision you face", "Stay on nights and you could become a supervisor in about two years (around HK$36,000). Or take the day job you have been offered at a property-management company: HK$23,000, 8 am–6 pm, Monday to Saturday."], ["Family", "Your father (61) is a security guard on 12-hour shifts. Your mother (58) cleans at a shopping mall in the mornings. She has said she could look after a baby in the afternoons, but she needs her job and the income."], ["Children", "You want a child, but not in your parents’ flat, and not until you have saved at least HK$300,000."]], "ask_to": "Jamie", "ask": "If we have a baby now, which of us changes jobs, and how do we pay for it?", "protect": "Financial security. You grew up in a family in debt and never want your child to live with that worry."}, {"id": "D2", "name": "Jamie Tse", "age": 29, "role": "Store supervisor at a cosmetics chain", "sections": [["Work", "HK$22,000 a month plus about HK$3,000 in commission. Shifts 11 am–9 pm, about 50 hours a week. You must work Saturdays and Sundays; your two days off are weekdays that change every week."], ["A decision you face", "You have been offered assistant manager at the Tsim Sha Tsui store: about HK$28,000 with commission, closing shifts until 10:30 pm and a longer commute. An office admin job elsewhere is also open to you: HK$18,000, 9 am–6 pm, Monday to Friday."], ["Family", "Your parents are divorced. Your mother (55) works full-time as a restaurant cashier in the evenings and cannot help regularly. You rarely see your father."], ["Children", "You want a child within two years: “If we wait until Hong Kong feels affordable, we’ll wait forever.”"]], "ask_to": "Chris", "ask": "When would we actually see each other, let alone a baby?", "protect": "Having a child while you are young, and not putting your life on hold for a flat."}]}]}</script>
+<script>const D = JSON.parse(document.getElementById('data').textContent);
+const app = document.getElementById('app');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))
+  .replace(/(\d)–(\d)/g, '$1\u2060–\u2060$2')
+  .replace(/(\d) (am|pm)\b/g, '$1\u00a0$2')
+  .replace(/(\d) sq ft/g, '$1\u00a0sq\u00a0ft');
+const hhById = Object.fromEntries(D.households.map(h => [h.id, h]));
+const cardById = {};
+D.households.forEach(h => h.cards.forEach(c => cardById[c.id] = {hh: h, card: c}));
+const vars = id => `--a:var(--${id});--t:var(--${id}-t)`;
+
+function extras(open) {
+  const rules = D.rules.map(r => `<li><b>${esc(r.title)}.</b> ${esc(r.text)}</li>`).join('');
+  const qs = D.questions.map(q => `<li><b>${esc(q.title)}.</b> ${esc(q.text)}</li>`).join('');
+  const real = D.reality.map(r => `<li><b>${esc(r.label)}.</b> ${esc(r.text)}</li>`).join('');
+  const stress = D.stress_test.items.map(s => `<li>${esc(s)}</li>`).join('');
+  const opts = D.decision.options.map(o => `<b>${esc(o[0])}</b><span>${esc(o[1])}</span>`).join('');
+  return `
+  <details ${open ? 'open' : ''}><summary>Three rules</summary><div class="body"><ol>${rules}</ol></div></details>
+  <details><summary>Five things to talk about</summary><div class="body"><ol>${qs}</ol>
+    <p><b>${esc(D.tuesday_test.title)}.</b> ${esc(D.tuesday_test.text)}</p></div></details>
+  <details><summary>Hong Kong reality check</summary><div class="body"><ul>${real}</ul>
+    <p class="small">${esc(D.reality_note)}</p></div></details>
+  <details><summary>${esc(D.stress_test.title)}</summary><div class="body"><ul>${stress}</ul></div></details>
+  <details><summary>${esc(D.decision.title)}</summary><div class="body"><div class="opt">${opts}</div>
+    <p>${esc(D.decision.after)}</p></div></details>`;
+}
+
+function footer() {
+  return `<footer>${esc(D.meta.course_line)}<br>${esc(D.disclaimer)}</footer>`;
+}
+
+function home() {
+  const steps = D.howto.map(s => `<li>${esc(s)}</li>`).join('');
+  const tiles = D.households.map(h =>
+    `<a class="hh" style="${vars(h.id)}" href="#${h.id}"><span class="letter">${h.id}</span>
+     <span class="lbl">Household ${h.id}</span></a>`).join('');
+  const timing = D.timing.map(t => `<span>${esc(t[0])} · ${esc(t[1])}</span>`).join('');
+  return `
+  <p class="kicker">${esc(D.meta.course_line)}</p>
+  <h1>${esc(D.meta.title)}</h1>
+  <p class="sub">${esc(D.meta.subtitle)}</p>
+  <p class="lead">${esc(D.lead)}</p>
+  <h2>Find your card</h2>
+  <ol class="steps">${steps}</ol>
+  <div class="grid">${tiles}</div>
+  <a class="trio" href="#C">Household of three? Open <b>Household C</b>.</a>
+  <p class="small">${esc(D.backup_rule)}</p>
+  <div class="timing">${timing}</div>
+  ${extras(false)}
+  ${footer()}`;
+}
+
+function household(id) {
+  const h = hhById[id];
+  const seat = ['I’m sitting on the LEFT', 'I’m sitting on the RIGHT', 'Household of three only: the third person'];
+  const btns = h.cards.map((c, i) =>
+    `<a class="role-btn" style="${vars(id)}" href="#${c.id}"><b>Card ${i + 1}</b><span>${seat[i]}</span></a>`).join('');
+  return `
+  <a class="back" href="#">← All households</a>
+  <p class="kicker">${esc(D.meta.title)}</p>
+  <h1>Household ${id}</h1>
+  <div class="warn">Open <b>only your own card</b>. Don’t show your screen: introduce yourself to your partner in character.</div>
+  ${btns}
+  ${footer()}`;
+}
+
+function card(id) {
+  const {hh, card: c} = cardById[id];
+  const secs = c.sections.map(s => `<div class="sec"><b>${esc(s[0])}</b><p>${esc(s[1])}</p></div>`).join('');
+  const who = c.ask_to === 'both of them' ? 'Ask both of them' : `Ask ${esc(c.ask_to)}`;
+  return `
+  <div style="${vars(hh.id)}">
+  <a class="back" href="#${hh.id}">← Household ${hh.id}</a>
+  <div class="card-head"><span class="chip">${c.id}</span>
+    <h1>${esc(c.name)}, ${c.age}</h1><div class="role">${esc(c.role)}</div></div>
+  <div class="together"><b>${esc(c.together_label || 'Together')}</b>${esc(c.together || hh.together)}</div>
+  ${secs}
+  <div class="ask"><b>${who}</b><q>${esc(c.ask)}</q></div>
+  <div class="protect"><b>What you most want to protect</b><p>${esc(c.protect)}</p></div>
+  <p class="intro">${esc(c.intro || D.intro_prompt)}</p>
+  ${extras(false)}
+  ${footer()}
+  </div>`;
+}
+
+function route() {
+  const id = decodeURIComponent(location.hash.replace(/^#\/?/, '')).toUpperCase();
+  let html;
+  if (cardById[id]) html = card(id);
+  else if (hhById[id]) html = household(id);
+  else html = home();
+  app.innerHTML = html;
+  window.scrollTo(0, 0);
+  const t = cardById[id] ? `${id} · ${cardById[id].card.name}` : hhById[id] ? `Household ${id}` : '';
+  document.title = (t ? t + ' · ' : '') + D.meta.title;
+}
+window.addEventListener('hashchange', route);
+route();</script>
+</body>
+</html>
